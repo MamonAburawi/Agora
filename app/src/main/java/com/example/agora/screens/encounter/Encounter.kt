@@ -2,14 +2,12 @@ package com.example.agora.screens.encounter
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.graphics.PorterDuff
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.SurfaceView
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.databinding.DataBindingUtil
@@ -18,13 +16,11 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.example.agora.R
 import com.example.agora.databinding.EncounterBinding
-import com.example.agora.setQuality
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
-import io.agora.agorauikit_android.AgoraVideoViewer
 import io.agora.rtc.IRtcEngineEventHandler
 import io.agora.rtc.IRtcEngineEventHandler.RemoteAudioStats
 import io.agora.rtc.IRtcEngineEventHandler.RemoteVideoStats
@@ -33,7 +29,6 @@ import io.agora.rtc.video.VideoCanvas
 import io.agora.rtc.video.VideoEncoderConfiguration
 
 
-@Suppress("DEPRECATION")
 @SuppressLint("SetTextI18n")
 class Encounter : Fragment() {
 
@@ -46,16 +41,8 @@ class Encounter : Fragment() {
     }
 
 
-
     private lateinit var binding: EncounterBinding
     private lateinit var viewModel: EncounterViewModel
-
-
-
-
-    private var agView: AgoraVideoViewer? = null
-    private var isMicEnabled = false
-    private var isVideoEnabled = true
 
     private var mTxQuality = -1
     private var mRxQuality:Int = -1
@@ -86,39 +73,26 @@ class Encounter : Fragment() {
 
             /** button microphone **/
             btnMicrophone.setOnClickListener {
-                onLocalAudioMuteClicked()
-//                if (isMicEnabled) {
-//                    mRtcEngine!!.enableLocalAudio(false)
-//                }else{
-//                    mRtcEngine!!.enableLocalAudio(true)
-//                }
+                enableAudio()
             }
 
 
             /** button switch camera **/
             btnCameraSwitch.setOnClickListener {
-                onSwitchCameraClicked()
-//                mRtcEngine!!.switchCamera()
+                onSwitchCamera()
             }
 
             /** button video **/
             btnVideo.setOnClickListener {
-                onLocalVideoMuteClicked()
-//                if(isVideoEnabled){
-//                    mRtcEngine!!.stopPreview()
-//
-//                    mRtcEngine!!.enableLocalVideo(false)
-//                }else{
-//                    mRtcEngine!!.enableLocalVideo(true)
-//                }
+                enableLocalCamera()
             }
 
             /** button end call **/
             btnEndCall.setOnClickListener {
-                onEncCallClicked()
+                onEndCall()
             }
 
-//            mRtcEngine!!.setEnableSpeakerphone()
+
 
         }
     }
@@ -152,7 +126,7 @@ class Encounter : Fragment() {
     }
 
 
-    fun onLocalVideoMuteClicked() {
+    private fun enableLocalCamera() {
         val iv = binding.btnVideo as ImageView
         if (iv.isSelected) {
             iv.isSelected = false
@@ -171,7 +145,7 @@ class Encounter : Fragment() {
     }
 
 
-    fun onLocalAudioMuteClicked() {
+    private fun enableAudio() {
         val iv = binding.btnMicrophone as ImageView
         if (iv.isSelected) {
             iv.isSelected = false
@@ -180,25 +154,18 @@ class Encounter : Fragment() {
         } else {
             iv.isSelected = true
             iv.setImageResource(R.drawable.ic_mic_off)
-//            iv.setColorFilter(resources.getColor(R.color.purple_200), PorterDuff.Mode.MULTIPLY)
         }
         mRtcEngine!!.muteLocalAudioStream(iv.isSelected)
     }
 
-    fun onSwitchCameraClicked() {
+    private fun onSwitchCamera() {
         mRtcEngine!!.switchCamera()
     }
 
-    fun onEncCallClicked() {
-
+    private fun onEndCall() {
         mRtcEngine?.leaveChannel()
         RtcEngine.destroy()
         requireActivity().onBackPressed()
-
-////        mRtcEngine?.leaveChannel()
-////        RtcEngine.destroy()
-////        findNavController().navigateUp()
-//        viewModel.endCall(mRtcEngine!!)
     }
 
     private val mRtcEventHandler = object : IRtcEngineEventHandler() {
@@ -308,22 +275,6 @@ class Encounter : Fragment() {
     }
 
 
-//    private fun setupRemoteVideo(uid: Int) {
-//        val container = binding.remoteVideoViewContainer
-//        if (container.childCount >= 1) {
-//            return
-//        }
-//        val surfaceView = RtcEngine.CreateRendererView(requireActivity().baseContext)
-//        container.addView(surfaceView)
-//        mRtcEngine!!.setupRemoteVideo(VideoCanvas(surfaceView, VideoCanvas.RENDER_MODE_FIT, uid))
-//        surfaceView.tag = uid // for mark purpose
-//        val tipMsg = binding.quickTipsWhenUseAgoraSdk
-//        tipMsg.visibility = View.GONE
-//
-//    }
-
-
-
     private fun qualityStringFromQualityNumber(number: Int): String {
         return when (number) {
             IRtcEngineEventHandler.Quality.EXCELLENT -> "Excellent 👌"
@@ -395,57 +346,6 @@ class Encounter : Fragment() {
         RtcEngine.destroy()
     }
 
-
-//    private val mRtcEventHandler2: IRtcEngineEventHandler = object : IRtcEngineEventHandler() {
-//        override fun onFirstRemoteVideoDecoded(uid: Int, width: Int, height: Int, elapsed: Int) {
-//            runMain(Runnable { setupRemoteVideo(uid) })
-//        }
-//
-//        override fun onUserOffline(uid: Int, reason: Int) {
-//            runOnUiThread(Runnable { onRemoteUserLeft() })
-//        }
-//
-//        override fun onUserMuteVideo(uid: Int, muted: Boolean) {
-//            runOnUiThread(Runnable { onRemoteUserVideoMuted(uid, muted) })
-//        }
-//    }
-
-
-
-    //    private fun initializeAndJoinChannel() {
-//        // Create AgoraVideoViewer instance
-//        try {
-//            agView = AgoraVideoViewer(this, AgoraConnectionData(APP_ID),)
-//        } catch (e: Exception) {
-//            print("Could not initialize AgoraVideoViewer. Check your App ID is valid.")
-//            print(e.message)
-//            return
-//        }
-//        // Fill the parent ViewGroup (MainActivity)
-//        this.addContentView(agView, FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT))
-//
-//
-//        // Check permission and join channel
-//        if (AgoraVideoViewer.requestPermissions(this)) {
-//            agView!!.join(CHANNEL, token = TOKEN, role = Constants.CLIENT_ROLE_BROADCASTER)
-//        }
-//
-//        else {
-//            val joinButton = Button(this)
-//            joinButton.text = "Allow Camera and Microphone, then click here"
-//            joinButton.setOnClickListener {
-//                // When the button is clicked, check permissions again and join channel
-//                // if permissions are granted.
-//                if (AgoraVideoViewer.requestPermissions(this)) {
-//                    (joinButton.parent as ViewGroup).removeView(joinButton)
-//                    agView!!.join(CHANNEL, token = TOKEN, role = Constants.CLIENT_ROLE_BROADCASTER)
-//                }
-//            }
-//            joinButton.setBackgroundColor(Color.GREEN)
-//            joinButton.setTextColor(Color.RED)
-//            this.addContentView(joinButton, FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, 300))
-//        }
-//    }
 
 
 

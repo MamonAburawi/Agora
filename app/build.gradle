@@ -51,9 +51,8 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
 
 
-    implementation 'io.agora.rtc:full-sdk:3.7.0'
-//    implementation 'com.github.AgoraIO-Community:Android-UIKit:2.1.0'
-    implementation 'com.github.AgoraIO-Community.Android-UIKit:final:2.0.6'
+    implementation 'io.agora.rtc:full-sdk:3.7.1'
+
 
 
     // check permissions
